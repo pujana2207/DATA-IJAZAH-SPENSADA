@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verifikasi Data Ijazah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    .card {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-2px);
+    }
+    
+    .info-card {
+      border-left: 4px solid #3b82f6;
+      background: white;
+    }
+    
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-right: 12px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .modal-content {
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    input:focus, select:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-4">
+        <div class="bg-blue-100 p-4 rounded-full">
+          <img src="https://i.ibb.co.com/3YjdDh2N/logo-sekolah-FINAL.png" alt="Logo Sekolah" class="h-14 w-14 object-contain">
+        </div>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Verifikasi Data Ijazah SMP Negeri 1 Sukasada</h1>
+      <p class="text-gray-600">Masukkan NIS siswa untuk memverifikasi data ijazah</p>
+    </div>
+    
+    <div class="card bg-white rounded-xl p-6 mb-6">
+      <div class="mb-4">
+        <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Siswa (NIS)</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-id-card text-gray-400"></i>
+          </div>
+          <input 
+            type="text" 
+            id="nisInput" 
+            placeholder="Contoh: 11299" 
+            class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            onkeydown="if(event.key === 'Enter') cariData()"
+          >
+        </div>
+      </div>
+      
+      <button 
+        onclick="cariData()" 
+        class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold flex items-center justify-center"
+      >
+        <i class="fas fa-search mr-2"></i> Cari Data
+      </button>
+    </div>
+    
+    <div id="dataSection" class="hidden">
+      <div class="info-card rounded-lg p-5 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-user-graduate text-blue-500 mr-2"></i> Data Siswa
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <p class="text-sm text-gray-500">NIS</p>
+            <p id="nis" class="font-medium text-gray-800">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">NISN</p>
+            <p id="nisn" class="font-medium text-gray-800">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Nama Lengkap</p>
+            <p id="nama" class="font-medium text-gray-800">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Tempat Tanggal Lahir</p>
+            <p id="ttl" class="font-medium text-gray-800">-</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card bg-white rounded-xl p-6 mb-4">
+        <div class="mb-4">
+          <label for="statusSelect" class="block text-sm font-medium text-gray-700 mb-1">Status Data</label>
+          <select 
+            id="statusSelect" 
+            onchange="cekStatus()"
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          >
+            <option value="">Pilih Status</option>
+            <option value="Benar">Benar</option>
+            <option value="Salah">Salah</option>
+          </select>
+        </div>
+        
+        <div id="koreksiSection" class="hidden">
+          <label for="dataBenar" class="block text-sm font-medium text-gray-700 mb-1">Koreksi Data</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-edit text-gray-400"></i>
+            </div>
+            <input 
+              type="text" 
+              id="dataBenar" 
+              placeholder="Masukkan data yang benar jika ada kesalahan" 
+              class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            >
+          </div>
+        </div>
+      </div>
+      
+      <button 
+        id="simpanBtn" 
+        onclick="simpanData()" 
+        class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold hidden flex items-center justify-center mb-6"
+      >
+        <i class="fas fa-save mr-2"></i> Simpan Verifikasi
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Modal for Searching -->
+  <div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 flex items-center">
+      <div class="loading-spinner"></div>
+      <p class="text-gray-800 font-medium">Memuat data...</p>
+    </div>
+  </div>
+
+  <!-- Loading Modal for Saving -->
+  <div id="savingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 flex items-center">
+      <div class="loading-spinner"></div>
+      <p class="text-gray-800 font-medium">Sedang menyimpan data...</p>
+    </div>
+  </div>
+
+  <!-- Popup Modal -->
+  <div id="popupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="modal-content bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center">
+      <div class="flex justify-center mb-4">
+        <div class="bg-green-100 p-3 rounded-full">
+          <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+        </div>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-2">Berhasil!</h3>
+      <p class="text-gray-600 mb-6">Data berhasil disimpan!</p>
+      <button 
+        onclick="closePopup()" 
+        class="btn-primary py-2 px-6 rounded-lg text-white font-medium"
+      >
+        OK
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxXP5iDkFWgtMSUia-SCyNzdH_7VSvDA5aj0dlpQnDF_aDsmCJwQtb1bz-cllsT4mdyuQ/exec"; // Ganti dengan URL Web App kamu
+
+    let dataSiswa = {};
+
+    window.onload = function() {
+      document.getElementById("popupModal").style.display = "none";
+      document.getElementById("loadingModal").style.display = "none";
+      document.getElementById("savingModal").style.display = "none";
+      document.getElementById("dataSection").style.display = "none";
+    }
+
+    function showLoading() {
+      document.getElementById("loadingModal").style.display = "flex";
+    }
+    function hideLoading() {
+      document.getElementById("loadingModal").style.display = "none";
+    }
+
+    function showSaving() {
+      document.getElementById("savingModal").style.display = "flex";
+    }
+    function hideSaving() {
+      document.getElementById("savingModal").style.display = "none";
+    }
+
+    function cariData() {
+      const nisInput = document.getElementById("nisInput").value.trim();
+      if (!nisInput) {
+        showAlert("error", "Masukkan NIS terlebih dahulu!");
+        return;
+      }
+
+      showLoading();
+
+      fetch(scriptURL + "?action=getData&nis=" + encodeURIComponent(nisInput), {
+        method: "POST"
+      })
+      .then(res => res.json())
+      .then(data => {
+        hideLoading();
+        if (!data || !data.NAMA) {
+          showAlert("error", "Data tidak ditemukan!");
+          document.getElementById("dataSection").style.display = "none";
+          return;
+        }
+
+        dataSiswa = data;
+
+        document.getElementById("nis").innerText = data["NIS"] || "-";
+        document.getElementById("nisn").innerText = data["NISN"] || "-";
+        document.getElementById("nama").innerText = data["NAMA"] || "-";
+        document.getElementById("ttl").innerText = data["TEMPAT TANGGAL LAHIR"] || "-";
+        document.getElementById("dataSection").style.display = "block";
+
+        // Reset form status & koreksi
+        document.getElementById("statusSelect").value = "";
+        document.getElementById("koreksiSection").style.display = "none";
+        const simpanBtn = document.getElementById("simpanBtn");
+        simpanBtn.style.display = "none";
+        simpanBtn.disabled = false;
+        document.getElementById("dataBenar").value = "";
+        
+        // Scroll to data section
+        document.getElementById("dataSection").scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(err => {
+        hideLoading();
+        showAlert("error", "Gagal mengambil data.");
+        console.error(err);
+      });
+    }
+
+    function cekStatus() {
+      const status = document.getElementById("statusSelect").value;
+      document.getElementById("koreksiSection").style.display = status === "Salah" ? "block" : "none";
+      const simpanBtn = document.getElementById("simpanBtn");
+      simpanBtn.style.display = status ? "flex" : "none";
+      simpanBtn.disabled = false;
+    }
+
+    function simpanData() {
+      const status = document.getElementById("statusSelect").value;
+      const koreksi = document.getElementById("dataBenar").value.trim();
+      const nis = dataSiswa["NIS"];
+
+      if (!nis) {
+        showAlert("error", "Data tidak valid. Cari ulang.");
+        return;
+      }
+
+      if (status === "Salah" && koreksi === "") {
+        showAlert("error", "Isi data koreksi jika status salah.");
+        return;
+      }
+
+      const formData = new URLSearchParams();
+      formData.append("action", "simpanVerifikasi");
+      formData.append("nis", nis);
+      formData.append("status", status);
+      formData.append("koreksi", koreksi);
+
+      showSaving();
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text())
+      .then(response => {
+        hideSaving();
+        showPopup();
+      })
+      .catch(err => {
+        hideSaving();
+        showAlert("error", "Gagal menyimpan data.");
+        console.error(err);
+      });
+    }
+
+    function showPopup() {
+      document.getElementById("popupModal").style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("popupModal").style.display = "none";
+      // Reset form pencarian dan sembunyikan data
+      document.getElementById("nisInput").value = "";
+      document.getElementById("dataSection").style.display = "none";
+      dataSiswa = {};
+    }
+    
+    function showAlert(type, message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+      }`;
+      alertDiv.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        alertDiv.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
