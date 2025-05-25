@@ -3,12 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verifikasi Data Ijazah</title>
+  <title>Verifikasi Data Ijazah - SMP N 1 Sukasada</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fafc;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
     .custom-shadow {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
     .popup {
       display: none;
@@ -18,12 +28,18 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
+      backdrop-filter: blur(3px);
     }
     .popup-content {
       background: white;
       padding: 30px;
-      border-radius: 8px;
+      border-radius: 12px;
       text-align: center;
+      animation: popup 0.3s ease-out;
+    }
+    @keyframes popup {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
     .loading-spinner {
       border: 3px solid rgba(0, 0, 0, 0.1);
@@ -40,165 +56,251 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .data-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid #3b82f6;
+    }
+    .data-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .table-row:hover {
+      background-color: #f8fafc;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div class="max-w-4xl mx-auto p-4 md:p-6">
-    <!-- Header with Logo -->
-    <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center space-x-4">
-        <img src="https://i.ibb.co.com/3YjdDh2N/logo-sekolah-FINAL.png" alt="Logo Sekolah" class="h-14 w-14 object-contain">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800">Verifikasi Data Ijazah</h1>
-          <p class="text-gray-600">Sistem Validasi Data Siswa</p>
+<body class="min-h-screen">
+  <!-- Header with School Banner -->
+  <div class="gradient-bg text-white">
+    <div class="max-w-6xl mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="flex items-center space-x-4 mb-4 md:mb-0">
+          <div class="bg-white p-2 rounded-full">
+            <img src="https://i.ibb.co.com/3YjdDh2N/logo-sekolah-FINAL.png" alt="Logo Sekolah" class="h-12 w-12 object-contain">
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Verifikasi Data Ijazah</h1>
+            <p class="text-blue-100">SMP Negeri 1 Sukasada</p>
+          </div>
+        </div>
+        <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="currentDate" class="font-medium"></span>
+          </div>
         </div>
       </div>
-      <div class="hidden md:block bg-blue-100 text-blue-800 px-4 py-2 rounded-lg">
-        <i class="fas fa-info-circle mr-2"></i>
-        <span>SMP NEGERI 1 SUKASADA</span>
-      </div>
     </div>
+  </div>
 
-    <!-- Search Section -->
-    <div class="bg-white rounded-xl custom-shadow p-6 mb-6">
+  <!-- Main Content -->
+  <div class="max-w-6xl mx-auto px-4 py-8 -mt-6">
+    <!-- Search Card -->
+    <div class="bg-white rounded-xl custom-shadow p-6 mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-search mr-3 text-blue-500"></i>
+        <span>Cari Data Siswa</span>
+      </h2>
+      
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-grow">
-          <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-1">Masukkan Nomor Induk Siswa</label>
+          <label for="nisInput" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Siswa (NIS)</label>
           <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-id-card text-gray-400"></i>
+            </div>
             <input 
               type="text" 
               id="nisInput" 
               placeholder="Masukkan NIS dan tekan Enter" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             >
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <i class="fas fa-search text-gray-400"></i>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+              <button 
+                onclick="cariData()" 
+                class="text-blue-500 hover:text-blue-700 transition"
+              >
+                <i class="fas fa-search"></i>
+              </button>
             </div>
           </div>
+          <p class="mt-1 text-xs text-gray-500">Contoh: 12345678</p>
         </div>
         <div class="flex items-end">
           <button 
             onclick="cariData()" 
-            class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center"
+            class="btn-primary w-full md:w-auto text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center"
           >
             <i class="fas fa-search mr-2"></i> Cari Data
           </button>
         </div>
       </div>
-      <div id="loading" class="hidden mt-4 text-center py-2">
+      <div id="loading" class="hidden mt-4 text-center py-3 bg-blue-50 rounded-lg">
         <div class="loading-spinner"></div>
-        <span class="text-blue-600 font-medium">Memuat data...</span>
+        <span class="text-blue-600 font-medium">Memuat data siswa...</span>
       </div>
     </div>
 
     <!-- Data Section -->
-    <div id="dataSection" class="hidden bg-white rounded-xl custom-shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Data Siswa</h2>
+    <div id="dataSection" class="hidden bg-white rounded-xl custom-shadow p-6 mb-8 data-card">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+          <i class="fas fa-user-graduate mr-3 text-blue-500"></i>
+          <span>Data Siswa</span>
+        </h2>
+        <span id="statusBadge" class="hidden px-3 py-1 rounded-full text-xs font-medium"></span>
+      </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <p class="text-sm text-gray-500">NIS</p>
-          <p id="nis" class="font-medium text-gray-800">-</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-500 flex items-center">
+            <i class="fas fa-id-card mr-2"></i> NIS
+          </p>
+          <p id="nis" class="font-medium text-gray-800 text-lg mt-1">-</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-500">NISN</p>
-          <p id="nisn" class="font-medium text-gray-800">-</p>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-500 flex items-center">
+            <i class="fas fa-id-card-alt mr-2"></i> NISN
+          </p>
+          <p id="nisn" class="font-medium text-gray-800 text-lg mt-1">-</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-500">Nama Lengkap</p>
-          <p id="nama" class="font-medium text-gray-800">-</p>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-500 flex items-center">
+            <i class="fas fa-user mr-2"></i> Nama Lengkap
+          </p>
+          <p id="nama" class="font-medium text-gray-800 text-lg mt-1">-</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-500">Tempat/Tanggal Lahir</p>
-          <p id="ttl" class="font-medium text-gray-800">-</p>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-500 flex items-center">
+            <i class="fas fa-birthday-cake mr-2"></i> Tempat/Tanggal Lahir
+          </p>
+          <p id="ttl" class="font-medium text-gray-800 text-lg mt-1">-</p>
         </div>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label for="statusSelect" class="block text-sm font-medium text-gray-700 mb-1">Status Data</label>
+          <label for="statusSelect" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+            <i class="fas fa-check-circle mr-2"></i> Status Data
+          </label>
           <select 
             id="statusSelect" 
             onchange="toggleKoreksi()"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           >
-            <option value="">Pilih Status</option>
-            <option value="Benar">Benar</option>
-            <option value="Salah">Salah</option>
+            <option value="">Pilih Status Verifikasi</option>
+            <option value="Benar">Data Benar</option>
+            <option value="Salah">Data Perlu Koreksi</option>
           </select>
         </div>
 
         <div id="koreksiSection" class="hidden">
-          <label for="dataBenar" class="block text-sm font-medium text-gray-700 mb-1">Perbaikan Data</label>
-          <input 
-            type="text" 
+          <label for="dataBenar" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+            <i class="fas fa-edit mr-2"></i> Perbaikan Data
+          </label>
+          <textarea
             id="dataBenar" 
-            placeholder="Isi jika ada koreksi"
+            rows="3"
+            placeholder="Masukkan data yang benar jika ada kesalahan"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          >
+          ></textarea>
+          <p class="mt-1 text-xs text-gray-500">Pastikan data yang dimasukkan sudah benar</p>
         </div>
 
-        <button 
-          onclick="simpanData()" 
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center"
-        >
-          <i class="fas fa-save mr-2"></i> Simpan Verifikasi
-        </button>
-        <div id="saving" class="hidden text-center py-2">
+        <div class="pt-2">
+          <button 
+            onclick="simpanData()" 
+            class="btn-success w-full text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center"
+          >
+            <i class="fas fa-save mr-2"></i> Simpan Verifikasi
+          </button>
+        </div>
+        <div id="saving" class="hidden text-center py-3 bg-green-50 rounded-lg">
           <div class="loading-spinner"></div>
-          <span class="text-green-600 font-medium">Menyimpan data...</span>
+          <span class="text-green-600 font-medium">Menyimpan data verifikasi...</span>
         </div>
       </div>
     </div>
 
     <!-- Rekap Section -->
     <div class="bg-white rounded-xl custom-shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold text-gray-800">Rekapitulasi Konfirmasi</h2>
-        <button 
-          onclick="getRekap()" 
-          class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-3 rounded-lg transition flex items-center"
-        >
-          <i class="fas fa-sync-alt mr-1"></i> Refresh
-        </button>
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+          <i class="fas fa-chart-bar mr-3 text-blue-500"></i>
+          <span>Rekapitulasi Konfirmasi</span>
+        </h2>
+        <div class="flex space-x-2 mt-2 md:mt-0">
+          <button 
+            onclick="getRekap()" 
+            class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition flex items-center"
+          >
+            <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+          </button>
+          <button 
+            onclick="exportToExcel()" 
+            class="text-sm bg-green-100 hover:bg-green-200 text-green-700 py-2 px-4 rounded-lg transition flex items-center"
+          >
+            <i class="fas fa-file-excel mr-2"></i> Export Excel
+          </button>
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto rounded-lg border border-gray-200">
         <table id="rekapTable" class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Konfirmasi</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belum</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terkonfirmasi</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Siswa</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belum Konfirmasi</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200" id="rekapBody"></tbody>
         </table>
       </div>
 
-      <h3 class="mt-6 text-lg font-medium text-gray-800 mb-2">Total Keseluruhan</h3>
+      <h3 class="mt-8 text-lg font-medium text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-chart-pie mr-3 text-blue-500"></i>
+        <span>Statistik Keseluruhan</span>
+      </h3>
       <div id="rekapTotal" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
     </div>
+  </div>
 
-    <!-- Success Popup -->
-    <div class="popup" id="popupModal">
-      <div class="popup-content bg-white rounded-xl p-6 max-w-sm w-full">
-        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-          <i class="fas fa-check text-green-600 text-xl"></i>
-        </div>
-        <h3 class="mt-3 text-lg font-medium text-gray-900">Berhasil!</h3>
-        <div class="mt-2">
-          <p class="text-sm text-gray-500">Data berhasil disimpan!</p>
-        </div>
-        <div class="mt-4">
-          <button 
-            onclick="closePopup()" 
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
-          >
-            OK
-          </button>
-        </div>
+  <!-- Success Popup -->
+  <div class="popup" id="popupModal">
+    <div class="popup-content">
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
+        <i class="fas fa-check text-green-600 text-2xl"></i>
+      </div>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Verifikasi Berhasil!</h3>
+      <div class="mt-2">
+        <p class="text-sm text-gray-500">Data verifikasi siswa telah berhasil disimpan.</p>
+      </div>
+      <div class="mt-6">
+        <button 
+          onclick="closePopup()" 
+          class="btn-primary w-full text-white font-medium py-2 px-4 rounded-lg transition"
+        >
+          <i class="fas fa-check-circle mr-2"></i> Mengerti
+        </button>
       </div>
     </div>
   </div>
@@ -208,15 +310,21 @@
 
     let dataSiswa = {};
 
+    // Set current date
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options);
+
     document.getElementById("nisInput").addEventListener("keypress", function(e) {
       if (e.key === "Enter") cariData();
     });
 
     function cariData() {
       const nis = document.getElementById("nisInput").value.trim();
-      if (!nis) return alert("Masukkan NIS!");
+      if (!nis) return alert("Harap masukkan Nomor Induk Siswa (NIS)!");
 
       document.getElementById("loading").classList.remove("hidden");
+      document.getElementById("dataSection").classList.add("hidden");
 
       fetch(scriptURL + "?action=getData&nis=" + encodeURIComponent(nis), {
         method: "POST"
@@ -225,22 +333,44 @@
       .then(data => {
         document.getElementById("loading").classList.add("hidden");
 
-        if (!data.NAMA) return alert("Data tidak ditemukan!");
+        if (!data.NAMA) {
+          alert("Data siswa tidak ditemukan. Pastikan NIS yang dimasukkan benar.");
+          return;
+        }
 
         dataSiswa = data;
-        document.getElementById("nis").textContent = data["NIS"];
-        document.getElementById("nisn").textContent = data["NISN"];
-        document.getElementById("nama").textContent = data["NAMA"];
-        document.getElementById("ttl").textContent = data["TEMPAT TANGGAL LAHIR"];
+        document.getElementById("nis").textContent = data["NIS"] || '-';
+        document.getElementById("nisn").textContent = data["NISN"] || '-';
+        document.getElementById("nama").textContent = data["NAMA"] || '-';
+        document.getElementById("ttl").textContent = data["TEMPAT TANGGAL LAHIR"] || '-';
+
+        // Set status badge if already verified
+        if (data.STATUS) {
+          const statusBadge = document.getElementById("statusBadge");
+          statusBadge.classList.remove("hidden");
+          statusBadge.textContent = data.STATUS === "Benar" ? "✓ Data Benar" : "✗ Perlu Koreksi";
+          statusBadge.className = data.STATUS === "Benar" 
+            ? "px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" 
+            : "px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800";
+          
+          document.getElementById("statusSelect").value = data.STATUS;
+          document.getElementById("dataBenar").value = data.KOREKSI || '';
+          if (data.STATUS === "Salah") {
+            document.getElementById("koreksiSection").classList.remove("hidden");
+          }
+        } else {
+          document.getElementById("statusSelect").value = "";
+          document.getElementById("dataBenar").value = "";
+          document.getElementById("koreksiSection").classList.add("hidden");
+          document.getElementById("statusBadge").classList.add("hidden");
+        }
 
         document.getElementById("dataSection").classList.remove("hidden");
-        document.getElementById("statusSelect").value = "";
-        document.getElementById("dataBenar").value = "";
-        document.getElementById("koreksiSection").classList.add("hidden");
+        document.getElementById("dataSection").scrollIntoView({ behavior: 'smooth' });
       })
       .catch(() => {
         document.getElementById("loading").classList.add("hidden");
-        alert("Terjadi kesalahan saat memuat data");
+        alert("Terjadi kesalahan saat memuat data. Silakan coba lagi.");
       });
     }
 
@@ -260,8 +390,15 @@
       const koreksi = document.getElementById("dataBenar").value.trim();
       const nis = dataSiswa["NIS"];
 
-      if (!status) return alert("Pilih status terlebih dahulu.");
-      if (status === "Salah" && !koreksi) return alert("Isi koreksi jika data salah.");
+      if (!status) {
+        alert("Harap pilih status verifikasi terlebih dahulu.");
+        return;
+      }
+      
+      if (status === "Salah" && !koreksi) {
+        alert("Harap masukkan data yang benar untuk melanjutkan.");
+        return;
+      }
 
       document.getElementById("saving").classList.remove("hidden");
 
@@ -281,7 +418,7 @@
         })
         .catch(() => {
           document.getElementById("saving").classList.add("hidden");
-          alert("Gagal menyimpan data");
+          alert("Gagal menyimpan data verifikasi. Silakan coba lagi.");
         });
     }
 
@@ -293,6 +430,7 @@
       document.getElementById("popupModal").style.display = "none";
       document.getElementById("dataSection").classList.add("hidden");
       document.getElementById("nisInput").value = "";
+      document.getElementById("nisInput").focus();
       dataSiswa = {};
       getRekap();
     }
@@ -305,12 +443,23 @@
           tbody.innerHTML = "";
           
           data.kelas.forEach(k => {
+            const progress = Math.round((k.konfirmasi / k.total) * 100);
+            const progressColor = progress >= 80 ? 'bg-green-500' : 
+                                progress >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+            
             const tr = document.createElement("tr");
+            tr.className = "table-row";
             tr.innerHTML = `
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${k.kelas}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${k.konfirmasi}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${k.total}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${k.belum}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="h-2.5 rounded-full ${progressColor}" style="width: ${progress}%"></div>
+                </div>
+                <span class="text-xs text-gray-500 mt-1">${progress}%</span>
+              </td>
             `;
             tbody.appendChild(tr);
           });
@@ -319,16 +468,32 @@
           rekapTotal.innerHTML = "";
           
           Object.entries(data.total).forEach(([key, val]) => {
+            const icon = key.includes('Terkonfirmasi') ? 'fa-check-circle' : 
+                        key.includes('Total') ? 'fa-users' : 'fa-hourglass-half';
+            const bgColor = key.includes('Terkonfirmasi') ? 'bg-green-50' : 
+                           key.includes('Total') ? 'bg-blue-50' : 'bg-yellow-50';
+            const textColor = key.includes('Terkonfirmasi') ? 'text-green-800' : 
+                             key.includes('Total') ? 'text-blue-800' : 'text-yellow-800';
+            
             const div = document.createElement("div");
-            div.className = "bg-gray-50 p-3 rounded-lg";
+            div.className = `${bgColor} p-4 rounded-lg flex items-center`;
             div.innerHTML = `
-              <p class="text-xs text-gray-500">${key}</p>
-              <p class="text-lg font-semibold text-gray-800">${val}</p>
+              <div class="p-3 rounded-full ${bgColor.replace('50', '100')} mr-4">
+                <i class="fas ${icon} ${textColor} text-xl"></i>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">${key}</p>
+                <p class="text-xl font-semibold ${textColor}">${val}</p>
+              </div>
             `;
             rekapTotal.appendChild(div);
           });
         })
-        .catch(() => alert("Gagal memuat rekap."));
+        .catch(() => alert("Gagal memuat data rekap. Silakan refresh halaman."));
+    }
+
+    function exportToExcel() {
+      alert("Fitur export ke Excel akan segera tersedia!");
     }
 
     // Load rekap saat pertama kali
